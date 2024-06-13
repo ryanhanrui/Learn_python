@@ -1,0 +1,405 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyMTHY4FkO0EUXL8LChTPA9Z",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/ryanhanrui/nn-zero-to-hero/blob/master/Culminating_assignment\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "DBgcUC6xSCPu",
+        "outputId": "6f5a1674-2a35-497b-acd9-61cc5c5f1848"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "2, 4, 6, 10 credits: 2 credits\n",
+            "Game begin\n"
+          ]
+        }
+      ],
+      "source": [
+        "import re\n",
+        "import sys\n",
+        "import math\n",
+        "import random\n",
+        "\n",
+        "whole_credit = 50\n",
+        "\n",
+        "input_un_valid = True\n",
+        "\n",
+        "while input_un_valid:\n",
+        "    credit = input(\"2, 4, 6, 10 credits: \")\n",
+        "    if re.match(r\"^(2|4|6|10) credits$\",credit) is None:\n",
+        "        print(\"Please Enter a valid number \")\n",
+        "    else:\n",
+        "        int_credit = int(credit.replace(\" credits\", \"\"))\n",
+        "        if int_credit > whole_credit:\n",
+        "            print(\"Please enter a valid number of credit\")\n",
+        "\n",
+        "        else:\n",
+        "            print(\"Game begin\")\n",
+        "            input_un_valid = False\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "deck = [\"Ace\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\", \"Jack\", \"Queen\", \"King\"]\n",
+        "card_mapping = {'Ace':{\"1\":1,\"2\":10},\n",
+        "                'Jack': 10,\n",
+        "                'Queen': 10,\n",
+        "                'King': 10}\n",
+        "\n",
+        "number_mapping_full = {}\n",
+        "for i in range(2,11):\n",
+        "  number_mapping = {str(i) : i}\n",
+        "  number_mapping_full.update(number_mapping)\n",
+        "full_deck = {**card_mapping, **number_mapping_full}\n",
+        "\n",
+        "if_input = True\n",
+        "end_turn = False\n",
+        "give_up = False\n",
+        "lose = False\n",
+        "win = False\n",
+        "\n",
+        "current_point = 0\n",
+        "dealer_point = 0\n",
+        "\n",
+        "# int_credit = current_credit"
+      ],
+      "metadata": {
+        "id": "o-xeq__ZSVhv"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def hit(points, dealer = False):\n",
+        "  global current_point\n",
+        "  a = random.choice(deck)\n",
+        "  if a == \"Ace\":\n",
+        "    if dealer:\n",
+        "      points += card_mapping['Ace']['1']\n",
+        "    else:\n",
+        "      decide = int(input('is ace 10[2] or 1[1]: '))\n",
+        "      current_point += card_mapping['Ace'][str(decide)]\n",
+        "  elif dealer:\n",
+        "    points += full_deck[a]\n",
+        "    print(f\"Card: {a}, Point: {points}\")\n",
+        "    return points\n",
+        "\n",
+        "  else:\n",
+        "    current_point += full_deck[a]\n",
+        "    print(f\"Card: {a}, Point: {current_point}\")\n",
+        "    return current_point"
+      ],
+      "metadata": {
+        "id": "5NAhKsIChcX0"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def stand(current_point):\n",
+        "  print(\"turn ended\")"
+      ],
+      "metadata": {
+        "id": "d00az7dqhk1z"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def double(points):\n",
+        "  global current_point\n",
+        "  if current_point is None:\n",
+        "      current_point = 0\n",
+        "  current_point *= 2\n",
+        "  print(f\"Point doubled to {current_point}\")\n",
+        "  return current_point\n"
+      ],
+      "metadata": {
+        "id": "hc-Z1PFiifVI"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def surrender(int_credit):\n",
+        "  int_credit /= 2\n",
+        "  print(f\"you lose. Current credit {int_credit}\")"
+      ],
+      "metadata": {
+        "id": "x-hskUbNjCLi"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def check_lose(point):\n",
+        "  global lose\n",
+        "  if point > 21:\n",
+        "    lose = True\n",
+        "    print(\"you lose\")"
+      ],
+      "metadata": {
+        "id": "VGGPUAOSmU7D"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def check_win(points):\n",
+        "  global win\n",
+        "  if points == 21:\n",
+        "    win = True\n",
+        "    print(\"you win\")"
+      ],
+      "metadata": {
+        "id": "pLIA8oDKmTx5"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def clear_score():\n",
+        "  global current_point\n",
+        "  current_point = 0\n",
+        "  return 0"
+      ],
+      "metadata": {
+        "id": "HqME1qy-JhwC"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def dealer_turn():\n",
+        "    global dealer_point\n",
+        "    dealer_point = 0\n",
+        "    print(\"____________________\\n Dealer's turn\")\n",
+        "    dealer_point = hit(dealer_point, dealer=True)\n",
+        "\n",
+        "    while dealer_point <= 17:\n",
+        "        u_input = input(\"Press ENTER to continue: \")\n",
+        "        if u_input == \"\":\n",
+        "            dealer_point = hit(dealer_point, dealer=True)\n",
+        "        else:\n",
+        "            break\n",
+        "dealer_point =0\n",
+        "dealer_turn()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "9BmqALZamDGb",
+        "outputId": "f0088a0f-88eb-4018-c9e7-5761741d672e"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "____________________\n",
+            " Dealer's turn\n",
+            "Card: King, Point: 10\n",
+            "Press ENTER to continue: \n",
+            "Card: Queen, Point: 20\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "function_mapping = {\n",
+        "    1: hit,\n",
+        "    2: stand,\n",
+        "    3: double,\n",
+        "    4: surrender,\n",
+        "    5: clear_score\n",
+        "}"
+      ],
+      "metadata": {
+        "id": "p8jLnPAClJSJ"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def user_turn():\n",
+        "  global if_input\n",
+        "  while if_input:\n",
+        "    user_choice = input(\"Input a choice: hit[1], stand[2], double[3], surrender[4]: \")\n",
+        "    int_user_choice = int(user_choice)\n",
+        "    global current_point\n",
+        "    global int_credit\n",
+        "    check_win(current_point)\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "    check_lose(current_point)\n",
+        "    if re.match(r\"^(1|2|3|4|5)$\", user_choice) is None:\n",
+        "          print(\"Please Enter a valid number \")\n",
+        "    else:\n",
+        "      if int_user_choice in (1, 2):\n",
+        "        function_mapping[int_user_choice](current_point)\n",
+        "      elif int_user_choice == 3:\n",
+        "          int_credit = function_mapping[int_user_choice](int_credit)\n",
+        "      elif int_user_choice == 4:\n",
+        "        int_credit = function_mapping[int_user_choice](current_point)\n",
+        "      current_point = 0\n",
+        "      return\n",
+        "user_turn()\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 336
+        },
+        "id": "cU5IOE6r3pvN",
+        "outputId": "26441171-98dc-493e-e7a0-b7cedf89bdd4"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "KeyboardInterrupt",
+          "evalue": "Interrupted by user",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mKeyboardInterrupt\u001b[0m                         Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-12-c31e81a55e7a>\u001b[0m in \u001b[0;36m<cell line: 21>\u001b[0;34m()\u001b[0m\n\u001b[1;32m     19\u001b[0m       \u001b[0mcurrent_point\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;36m0\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     20\u001b[0m       \u001b[0;32mreturn\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 21\u001b[0;31m \u001b[0muser_turn\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;32m<ipython-input-12-c31e81a55e7a>\u001b[0m in \u001b[0;36muser_turn\u001b[0;34m()\u001b[0m\n\u001b[1;32m      2\u001b[0m   \u001b[0;32mglobal\u001b[0m \u001b[0mif_input\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      3\u001b[0m   \u001b[0;32mwhile\u001b[0m \u001b[0mif_input\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 4\u001b[0;31m     \u001b[0muser_choice\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0minput\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Input a choice: hit[1], stand[2], double[3], surrender[4]: \"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      5\u001b[0m     \u001b[0mint_user_choice\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0muser_choice\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      6\u001b[0m     \u001b[0;32mglobal\u001b[0m \u001b[0mcurrent_point\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/ipykernel/kernelbase.py\u001b[0m in \u001b[0;36mraw_input\u001b[0;34m(self, prompt)\u001b[0m\n\u001b[1;32m    849\u001b[0m                 \u001b[0;34m\"raw_input was called, but this frontend does not support input requests.\"\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    850\u001b[0m             )\n\u001b[0;32m--> 851\u001b[0;31m         return self._input_request(str(prompt),\n\u001b[0m\u001b[1;32m    852\u001b[0m             \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_parent_ident\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    853\u001b[0m             \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_parent_header\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/ipykernel/kernelbase.py\u001b[0m in \u001b[0;36m_input_request\u001b[0;34m(self, prompt, ident, parent, password)\u001b[0m\n\u001b[1;32m    893\u001b[0m             \u001b[0;32mexcept\u001b[0m \u001b[0mKeyboardInterrupt\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    894\u001b[0m                 \u001b[0;31m# re-raise KeyboardInterrupt, to truncate traceback\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 895\u001b[0;31m                 \u001b[0;32mraise\u001b[0m \u001b[0mKeyboardInterrupt\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Interrupted by user\"\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mfrom\u001b[0m \u001b[0;32mNone\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    896\u001b[0m             \u001b[0;32mexcept\u001b[0m \u001b[0mException\u001b[0m \u001b[0;32mas\u001b[0m \u001b[0me\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    897\u001b[0m                 \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mlog\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mwarning\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Invalid Message:\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mexc_info\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mTrue\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mKeyboardInterrupt\u001b[0m: Interrupted by user"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "\n",
+        "current_point = 0\n",
+        "dealer_point = 0\n",
+        "hit(dealer_point, dealer = True)\n",
+        "\n",
+        "user_turn()\n",
+        "dealer_turn()\n",
+        "\n",
+        "\n",
+        "\n",
+        "if win is False:\n",
+        "  if dealer_point > current_point:\n",
+        "    print(\"\\n__________You lose\")\n",
+        "    int_credit = 0\n",
+        "  elif dealer_point == current_point:\n",
+        "    print(\"\\n__________Tie\")\n",
+        "  else:\n",
+        "    print(\"Player win\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "lcRlrqmKI5cZ",
+        "outputId": "15c69bc2-9f5c-4b60-f32a-e7de3a401bfd"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Card: 7, Point: 7\n",
+            "Input a choice: hit[1], stand[2], double[3], surrender[4]: 1\n",
+            "Card: 3, Point: 3\n",
+            "____________________\n",
+            " Dealer's turn\n",
+            "Card: 5, Point: 5\n",
+            "Press ENTER to continue: \n",
+            "Card: 10, Point: 15\n",
+            "Press ENTER to continue: \n",
+            "Card: 8, Point: 23\n",
+            "\n",
+            "__________You lose\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "\"8\">\"c\""
+      ],
+      "metadata": {
+        "id": "Qj3OV788Yjcd"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def hit():\n"
+      ],
+      "metadata": {
+        "id": "7-LjDz3-C31U"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
